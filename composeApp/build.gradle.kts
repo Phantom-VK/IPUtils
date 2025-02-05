@@ -67,7 +67,7 @@ kotlin {
 
 android {
     namespace = "sggs.cn.iputils"
-    compileSdk = libs.versions.android.compileSdk.get().toInt()
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "sggs.cn.iputils"
@@ -93,6 +93,7 @@ android {
 }
 
 dependencies {
+    implementation(libs.androidx.activity.ktx)
     debugImplementation(compose.uiTooling)
 }
 
