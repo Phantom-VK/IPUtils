@@ -9,7 +9,7 @@ import sggs.cn.iputils.components.IPButton
 @Preview
 fun App(
     platformContext: ContextFactory
-) {
+){
     MaterialTheme {
         IPButton(text = "Hello There", onClick = {})
     }
