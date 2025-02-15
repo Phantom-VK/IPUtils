@@ -1,5 +1,6 @@
 package sggs.cn.iputils
 
+import IPCalculatorScreen
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -11,6 +12,6 @@ fun App(
     platformContext: ContextFactory
 ){
     MaterialTheme {
-        IPButton(text = "Hello There", onClick = {})
+        IPCalculatorScreen()
     }
 }
