@@ -1,159 +1,240 @@
 package sggs.cn.iputils.mobileScreens
 
 import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
-import android.content.Context
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.Button
-import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import sggs.cn.iputils.Manifest
-import sggs.cn.iputils.utils.IPCalculator
-import sggs.cn.iputils.utils.IPInfo
+import sggs.cn.iputils.components.BinaryInformation
+import sggs.cn.iputils.components.CustomToast
+import sggs.cn.iputils.components.IPButton
+import sggs.cn.iputils.components.IPInformation
+import sggs.cn.iputils.components.NetworkInformation
+import sggs.cn.iputils.components.SubnettingInformation
+import sggs.cn.iputils.utils.saveIpInfoToCsv
+import sggs.cn.iputils.viewmodels.IPViewModel
 
 @Composable
-fun IPCalculatorScreen() {
+fun IPCalculatorScreen(viewModel: IPViewModel, onExit: () -> Unit) {
     var ipAddress by remember { mutableStateOf("") }
-    var ipInfo by remember { mutableStateOf<IPInfo?>(null) }
+    var subnetMask by remember { mutableStateOf("") }
+    var networkId by remember { mutableStateOf("") }
+    var showToast by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
-    val calculator = remember { IPCalculator() }
+    val ipInfo by viewModel.ipInfo.collectAsState()
+    val context = LocalContext.current
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text("IP Calculator", style = MaterialTheme.typography.h4)
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        OutlinedTextField(
-            value = ipAddress,
-            onValueChange = {
-                ipAddress = it
-                errorMessage = null
-            },
-            label = { Text("Enter IP Address") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            modifier = Modifier.fillMaxWidth(),
-            isError = errorMessage != null
-        )
-
-        errorMessage?.let {
-            Text(
-                text = it,
-                color = MaterialTheme.colors.error,
-                style = MaterialTheme.typography.caption,
-                modifier = Modifier.align(Alignment.Start)
-            )
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Button(
-            onClick = {
-                try {
-                    ipInfo = calculator.analyzeIP(ipAddress)
-                    errorMessage = null
-                } catch (e: Exception) {
-                    errorMessage = e.message ?: "Invalid IP address"
-                    ipInfo = null
-                }
-            },
-            modifier = Modifier.align(Alignment.End)
-        ) {
-            Text("Analyze")
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        ipInfo?.let { info ->
-            IPInfoDisplay(info)
-        }
-    }
-}
-
-@Composable
-fun IPInfoDisplay(ipInfo: IPInfo) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = 4.dp
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            InfoRow("IP Address", ipInfo.address)
-            InfoRow("IP Class", ipInfo.ipClass.toString())
-            InfoRow("Subnet Mask", ipInfo.subnetMask)
-            InfoRow("Network ID", ipInfo.networkID)
-            InfoRow("Address Type", ipInfo.addressType)
-            InfoRow("Good for Host", if (ipInfo.isGoodForHost) "Yes" else "No")
-            InfoRow("Number of Hosts", ipInfo.numberOfHosts.toString())
-
-            Spacer(modifier = Modifier.height(8.dp))
-            Text("Binary Information", style = MaterialTheme.typography.h6)
-            InfoRow("IP (Binary)", ipInfo.binaryAddress)
-            InfoRow("Mask (Binary)", ipInfo.binaryMask)
-
-            Spacer(modifier = Modifier.height(8.dp))
-            Text("Network Range", style = MaterialTheme.typography.h6)
-            InfoRow("Broadcast Address", ipInfo.broadcastAddress)
-            InfoRow("First Usable IP", ipInfo.firstUsableIP)
-            InfoRow("Last Usable IP", ipInfo.lastUsableIP)
-        }
-    }
-}
-
-@Composable
-fun InfoRow(label: String, value: String) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Text(label, style = MaterialTheme.typography.subtitle1)
-        Text(value, style = MaterialTheme.typography.body1)
-    }
-}
-
-@Composable
-fun RequestStoragePermission(context: Context) {
+    // Request permission just once when screen loads
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
         onResult = { granted ->
-            if (granted) {
-                Toast.makeText(context, "Permission Granted", Toast.LENGTH_SHORT).show()
-            } else {
-                Toast.makeText(context, "Permission Denied", Toast.LENGTH_SHORT).show()
+            if (!granted) {
+                Toast.makeText(context, "Storage permission is needed to save CSV files", Toast.LENGTH_SHORT).show()
             }
         }
     )
 
-    Button(onClick = { permissionLauncher.launch(WRITE_EXTERNAL_STORAGE) }) {
-        Text("Request Storage Permission")
+    LaunchedEffect(Unit) {
+        permissionLauncher.launch(WRITE_EXTERNAL_STORAGE)
+    }
+
+    CustomToast("Saved to CSV (Downloads Folder)!", visible = showToast) {
+        showToast = false
+    }
+
+    BoxWithConstraints(
+        modifier = Modifier.fillMaxSize().padding(16.dp)
+    ) {
+        val isWideScreen = maxWidth > 600.dp // Tablet-like width
+
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            // Title
+            Text(
+                text = "IP Calculator",
+                style = MaterialTheme.typography.h5,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+
+            if (ipInfo != null) {
+                if (isWideScreen) {
+                    // Tablet Layout (Row-based, like Desktop)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            IPInformation(
+                                ipAddress = ipAddress,
+                                subnetMask = subnetMask,
+                                isError = errorMessage != null,
+                                errorMessage = errorMessage,
+                                networkId = networkId,
+                                onReset = {
+                                    viewModel.resetInfo()
+                                    ipAddress = ""
+                                    subnetMask = ""
+                                    networkId = ""
+                                    errorMessage = null
+                                },
+                                onDefaultMask = { ipInfo?.let { subnetMask = it.subnetMask } },
+                                onComputeNow = { ipInfo?.let { networkId = it.networkID } },
+                                onIpChange = {
+                                    ipAddress = it
+                                    errorMessage = null
+                                },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                            ipInfo?.let { ip ->
+                                BinaryInformation(
+                                    binaryIP = ip.binaryAddress,
+                                    binaryMask = ip.binaryMask,
+                                    binaryNetworkId = ip.binaryNetworkID,
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            }
+                        }
+
+                        Column(modifier = Modifier.weight(1f)) {
+                            ipInfo?.let { ip ->
+                                NetworkInformation(
+                                    ipClass = ip.ipClass,
+                                    addressType = ip.addressType,
+                                    isGoodForHost = ip.isGoodForHost,
+                                    reason =  "",
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                                SubnettingInformation(
+                                    numberOfSubnetworks = ip.numberOfSubnets ?: 0,
+                                    numberOfHosts = ip.numberOfHosts,
+                                    range = (ip.firstUsableIP + ip.lastUsableIP),
+                                    networkIDs = listOf(ip.networkID),
+                                    broadcastIDs = listOf(ip.broadcastAddress),
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            }
+                        }
+                    }
+                } else {
+                    // Mobile Layout (Column-based)
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        IPInformation(
+                            ipAddress = ipAddress,
+                            subnetMask = subnetMask,
+                            isError = errorMessage != null,
+                            errorMessage = errorMessage,
+                            networkId = networkId,
+                            onReset = {
+                                viewModel.resetInfo()
+                                ipAddress = ""
+                                subnetMask = ""
+                                networkId = ""
+                                errorMessage = null
+                            },
+                            onDefaultMask = { ipInfo?.let { subnetMask = it.subnetMask } },
+                            onComputeNow = { ipInfo?.let { networkId = it.networkID } },
+                            onIpChange = {
+                                ipAddress = it
+                                errorMessage = null
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+
+                        ipInfo?.let { ip ->
+                            BinaryInformation(
+                                binaryIP = ip.binaryAddress,
+                                binaryMask = ip.binaryMask,
+                                binaryNetworkId = ip.binaryNetworkID,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+
+                            NetworkInformation(
+                                ipClass = ip.ipClass,
+                                addressType = ip.addressType,
+                                isGoodForHost = ip.isGoodForHost,
+                                reason =  "",
+                                modifier = Modifier.fillMaxWidth()
+                            )
+
+                            SubnettingInformation(
+                                numberOfSubnetworks = ip.numberOfSubnets ?: 0,
+                                numberOfHosts = ip.numberOfHosts,
+                                range = "1",
+                                networkIDs = listOf(ip.networkID),
+                                broadcastIDs = listOf(ip.broadcastAddress),
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+                    }
+                }
+            } else {
+                // Show empty state or initial state
+                Text(
+                    text = "Enter an IP address and click Calculate to begin",
+                    style = MaterialTheme.typography.body1,
+                    modifier = Modifier.padding(vertical = 32.dp)
+                )
+            }
+
+            // Buttons (Common for both layouts)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                IPButton(
+                    text = "Calculate",
+                    modifier = Modifier.weight(1f).height(50.dp)
+                ) {
+                    try {
+                        viewModel.fetchIpInfo(ipAddress)
+                        errorMessage = null
+                    } catch (e: Exception) {
+                        errorMessage = e.message ?: "Invalid IP address or subnet mask"
+                    }
+                }
+
+                IPButton(
+                    text = "Save",
+                    modifier = Modifier.weight(1f).height(50.dp),
+                ) {
+                    ipInfo?.let { ipInfo ->
+                        saveIpInfoToCsv(listOf(ipInfo))
+                        showToast = true
+                    }
+                }
+
+                IPButton(
+                    text = "Close",
+                    modifier = Modifier.weight(1f).height(50.dp)
+                ) {
+                    onExit()
+                }
+            }
+        }
     }
 }
