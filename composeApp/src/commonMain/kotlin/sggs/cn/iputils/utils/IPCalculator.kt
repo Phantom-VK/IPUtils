@@ -1,6 +1,6 @@
 package sggs.cn.iputils.utils
 
-class IPCalculator(){
+class IPCalculator {
 
     fun analyzeIP(ip: String): IPInfo {
         validateIP(ip)
@@ -10,6 +10,7 @@ class IPCalculator(){
         val networkID = getNetworkID(ip)
         val binaryIP = ipToBinary(ip)
         val binaryMask = ipToBinary(defaultMask)
+        val binaryNetworkID = ipToBinary(networkID)
         val addressType = getAddressType(ip)
         val isGoodForHost = isGoodForHosting(ip)
         val numberOfHosts = getNumberOfHosts(defaultMask)
@@ -23,6 +24,7 @@ class IPCalculator(){
             networkID = networkID,
             binaryAddress = binaryIP,
             binaryMask = binaryMask,
+            binaryNetworkID = binaryNetworkID,
             addressType = addressType,
             isGoodForHost = isGoodForHost,
             numberOfSubnets = 0, // For default mask
@@ -68,7 +70,7 @@ class IPCalculator(){
         }
     }
 
-    private fun ipToBinary(ip: String): String {
+    fun ipToBinary(ip: String): String {
         val octets = ip.split(".").map { it.toInt() }
         val binaryOctets = octets.map { it.toString(2).padStart(8, '0') }
         return binaryOctets.joinToString(".")
@@ -149,6 +151,7 @@ data class IPInfo(
     val binaryAddress: String,
     val binaryMask: String,
     val addressType: String,
+    val binaryNetworkID:String,
     val isGoodForHost: Boolean,
     val numberOfSubnets: Int,
     val numberOfHosts: Int,

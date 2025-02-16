@@ -12,8 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.material.TextFieldDefaults
@@ -41,7 +39,7 @@ fun IPInformation(
             .padding(16.dp)
     ) {
         Text(
-            text = "- IP Information -",
+            text = "------ IP Information ------",
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(bottom = 12.dp)
         )
@@ -139,7 +137,7 @@ fun NetworkInformation(
             .padding(16.dp)
     ) {
         Text(
-            text = "- Network Information -",
+            text = "------ Network Information ------",
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(bottom = 12.dp)
         )
@@ -205,7 +203,7 @@ fun NetworkInformation(
                 Box(
                     modifier = Modifier
                         .size(40.dp)
-                        .background(Color.LightGray, RoundedCornerShape(4.dp)),
+                        .background(Color.White, RoundedCornerShape(4.dp)),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
@@ -242,7 +240,7 @@ fun BinaryInformation(
             .padding(16.dp)
     ) {
         Text(
-            text = "- Binary Information -",
+            text = "------ Binary Information ------",
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(bottom = 12.dp)
         )
@@ -323,7 +321,7 @@ fun SubnettingInformation(
             .padding(16.dp)
     ) {
         Text(
-            text = "- Subnetting Information -",
+            text = "------ Subnetting Information ------",
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(bottom = 12.dp)
         )
