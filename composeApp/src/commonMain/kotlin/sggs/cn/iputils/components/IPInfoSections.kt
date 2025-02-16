@@ -11,7 +11,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.MaterialTheme.colors
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.material.TextFieldDefaults
@@ -20,6 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -27,6 +32,8 @@ fun IPInformation(
     ipAddress: String,
     subnetMask: String,
     networkId: String,
+    isError:Boolean,
+    errorMessage:String?,
     onReset: () -> Unit,
     onDefaultMask: () -> Unit,
     onComputeNow: () -> Unit,
@@ -59,13 +66,24 @@ fun IPInformation(
                 singleLine = true,
                 colors = TextFieldDefaults.outlinedTextFieldColors(
                     backgroundColor = Color.White
-                )
+                ),
+                isError = isError,
+                placeholder = { Text("Enter IP Address") }
             )
+
             Spacer(modifier = Modifier.width(8.dp))
             IPButton(
                 text = "Reset",
                 onClick = onReset,
                 modifier = Modifier.width(100.dp)
+            )
+        }
+        errorMessage?.let {
+            Text(
+                text = it,
+                color = MaterialTheme.colors.error,
+                style = MaterialTheme.typography.caption,
+                textAlign = TextAlign.Left
             )
         }
 
@@ -358,7 +376,7 @@ fun SubnettingInformation(
                 value = numberOfHosts.toString(),
                 onValueChange = {},
                 readOnly = true,
-                modifier = Modifier.width(80.dp),
+                modifier = Modifier.wrapContentWidth(),
                 singleLine = true,
                 colors = TextFieldDefaults.outlinedTextFieldColors(
                     backgroundColor = Color.White

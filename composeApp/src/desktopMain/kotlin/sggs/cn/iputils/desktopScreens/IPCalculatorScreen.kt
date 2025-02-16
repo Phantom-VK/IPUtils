@@ -9,8 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -20,22 +18,32 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import sggs.cn.iputils.components.BinaryInformation
+import sggs.cn.iputils.components.CustomToast
+import sggs.cn.iputils.components.IPButton
 import sggs.cn.iputils.components.IPInformation
 import sggs.cn.iputils.components.NetworkInformation
 import sggs.cn.iputils.components.SubnettingInformation
+import sggs.cn.iputils.utils.saveIpInfoToCsv
 import sggs.cn.iputils.viewmodels.IPViewModel
 
 @Composable
-fun IPCalculatorScreen(viewModel: IPViewModel) {
-    var ipAddress by remember { mutableStateOf("Enter Your IP") }
-    var subnetMask by remember { mutableStateOf("255.255.255.255") }
-    var networkId by remember { mutableStateOf("0.0.0.0") }
+fun IPCalculatorScreen(viewModel: IPViewModel, onExit: () -> Unit) {
+    var ipAddress by remember { mutableStateOf("") }
+    var subnetMask by remember { mutableStateOf("") }
+    var networkId by remember { mutableStateOf("") }
+    var showToast by remember { mutableStateOf(false) }
 
-    // This would typically be calculated from your IPCalculator class
+
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+
+
     val ipInfo by viewModel.ipInfo.collectAsState()
+
+    CustomToast("Saved to CSV (Downloads Folder)!", visible = showToast) {
+        showToast = false
+    }
 
 
     ipInfo?.let { ip ->
@@ -63,11 +71,22 @@ fun IPCalculatorScreen(viewModel: IPViewModel) {
                     IPInformation(
                         ipAddress = ipAddress,
                         subnetMask = subnetMask,
+                        isError = errorMessage != null,
+                        errorMessage = errorMessage,
                         networkId = networkId,
-                        onReset = { ipAddress = "" },
+                        onReset = {
+                            viewModel.resetInfo()
+                            ipAddress = ""
+                            subnetMask = ""
+                            networkId = ""
+                            errorMessage = null
+                        },
                         onDefaultMask = { subnetMask = ip.subnetMask },
                         onComputeNow = { networkId = ip.networkID },
-                        onIpChange = { ipAddress = it },
+                        onIpChange = {
+                            ipAddress = it
+                            errorMessage = null
+                        },
                         modifier = Modifier.fillMaxWidth()
                     )
 
@@ -101,8 +120,8 @@ fun IPCalculatorScreen(viewModel: IPViewModel) {
                         numberOfSubnetworks = 0,
                         numberOfHosts = ip.numberOfHosts,
                         range = "1",
-                        networkIDs = listOf("10.70.6.0"),
-                        broadcastIDs = listOf("10.70.6.255"),
+                        networkIDs = listOf(ip.networkID),
+                        broadcastIDs = listOf(ip.broadcastAddress),
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
@@ -116,39 +135,44 @@ fun IPCalculatorScreen(viewModel: IPViewModel) {
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
 
-                Button(
-                    onClick = { viewModel.fetchIpInfo(ipAddress) },
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(44.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        backgroundColor = Color.Green
-                    )
+                IPButton(
+                    text = "Calculate",
+                    modifier = Modifier.weight(1f).height(44.dp)
                 ) {
-                    Text("Calculate")
-                }
+                    try {
 
-                Button(
-                    onClick = { /* handle save */ },
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(44.dp)
+                        viewModel.fetchIpInfo(ipAddress)
+                        errorMessage = null
+                    } catch (e: Exception) {
+                        errorMessage = e.message ?: "Invalid IP address"
+                    }
+
+                }
+                Spacer(modifier = Modifier.width(16.dp))
+
+                IPButton(
+                    text = "Save",
+                    modifier = Modifier.weight(1f).height(44.dp)
                 ) {
-                    Text("Save")
+                    ipInfo?.let { ipInfo ->
+                        saveIpInfoToCsv(listOf(ipInfo))
+                        showToast = true
+                    }
                 }
 
                 Spacer(modifier = Modifier.width(16.dp))
 
-                Button(
-                    onClick = { /* handle close */ },
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(44.dp)
+                IPButton(
+                    text = "Close",
+                    modifier = Modifier.weight(1f).height(44.dp)
                 ) {
-                    Text("Close")
+                    onExit()
                 }
+
             }
         }
     }
 
 }
+
+

@@ -31,14 +31,16 @@ class IPViewModel : ViewModel() {
     val ipInfo: StateFlow<IPInfo?> = _ipInfo.asStateFlow()
 
     fun fetchIpInfo(ip: String) {
+
         val info = ipCalculator.analyzeIP(ip)
         _ipInfo.value = info  // Update state
     }
 
-    fun getBinaryNetworkID(ip: String): String {
-        return ipCalculator.ipToBinary(ip)
+    fun resetInfo(){
+        _ipInfo.value = tempIPInfo
 
     }
+
 
 
 

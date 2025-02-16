@@ -12,7 +12,7 @@ fun main() = application {
         title = "IPUtils",
     ) {
         val viewModel = IPViewModel()
-        IPCalculatorScreen(viewModel)
+        IPCalculatorScreen(viewModel,::exitApplication)
     }
 }
 

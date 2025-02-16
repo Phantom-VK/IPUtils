@@ -1,5 +1,10 @@
 package sggs.cn.iputils.mobileScreens
 
+import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+import android.content.Context
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -23,6 +28,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import sggs.cn.iputils.Manifest
 import sggs.cn.iputils.utils.IPCalculator
 import sggs.cn.iputils.utils.IPInfo
 
@@ -131,5 +137,23 @@ fun InfoRow(label: String, value: String) {
     ) {
         Text(label, style = MaterialTheme.typography.subtitle1)
         Text(value, style = MaterialTheme.typography.body1)
+    }
+}
+
+@Composable
+fun RequestStoragePermission(context: Context) {
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+        onResult = { granted ->
+            if (granted) {
+                Toast.makeText(context, "Permission Granted", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(context, "Permission Denied", Toast.LENGTH_SHORT).show()
+            }
+        }
+    )
+
+    Button(onClick = { permissionLauncher.launch(WRITE_EXTERNAL_STORAGE) }) {
+        Text("Request Storage Permission")
     }
 }
