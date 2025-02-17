@@ -5,15 +5,17 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
+import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -62,87 +64,59 @@ fun IPCalculatorScreen(viewModel: IPViewModel, onExit: () -> Unit) {
         showToast = false
     }
 
-    BoxWithConstraints(
-        modifier = Modifier.fillMaxSize().padding(16.dp)
-    ) {
-        val isWideScreen = maxWidth > 600.dp // Tablet-like width
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(text = "IP Calculator") }
+            )
+        },
+        bottomBar = {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                IPButton(
+                    text = "Calculate",
+                    modifier = Modifier.weight(1f).height(50.dp)
+                ) {
+                    try {
+                        viewModel.fetchIpInfo(ipAddress)
+                        errorMessage = null
+                    } catch (e: Exception) {
+                        errorMessage = e.message ?: "Invalid IP address or subnet mask"
+                    }
+                }
 
+                IPButton(
+                    text = "Save",
+                    modifier = Modifier.weight(1f).height(50.dp),
+                ) {
+                    ipInfo?.let { ipInfo ->
+                        saveIpInfoToCsv(listOf(ipInfo))
+                        showToast = true
+                    }
+                }
+
+                IPButton(
+                    text = "Close",
+                    modifier = Modifier.weight(1f).height(50.dp)
+                ) {
+                    onExit()
+                }
+            }
+        }
+    ) { padding ->
         Column(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Title
-            Text(
-                text = "IP Calculator",
-                style = MaterialTheme.typography.h5,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
-
             if (ipInfo != null) {
-                if (isWideScreen) {
-                    // Tablet Layout (Row-based, like Desktop)
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            IPInformation(
-                                ipAddress = ipAddress,
-                                subnetMask = subnetMask,
-                                isError = errorMessage != null,
-                                errorMessage = errorMessage,
-                                networkId = networkId,
-                                onReset = {
-                                    viewModel.resetInfo()
-                                    ipAddress = ""
-                                    subnetMask = ""
-                                    networkId = ""
-                                    errorMessage = null
-                                },
-                                onDefaultMask = { ipInfo?.let { subnetMask = it.subnetMask } },
-                                onComputeNow = { ipInfo?.let { networkId = it.networkID } },
-                                onIpChange = {
-                                    ipAddress = it
-                                    errorMessage = null
-                                },
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                            ipInfo?.let { ip ->
-                                BinaryInformation(
-                                    binaryIP = ip.binaryAddress,
-                                    binaryMask = ip.binaryMask,
-                                    binaryNetworkId = ip.binaryNetworkID,
-                                    modifier = Modifier.fillMaxWidth()
-                                )
-                            }
-                        }
-
-                        Column(modifier = Modifier.weight(1f)) {
-                            ipInfo?.let { ip ->
-                                NetworkInformation(
-                                    ipClass = ip.ipClass,
-                                    addressType = ip.addressType,
-                                    isGoodForHost = ip.isGoodForHost,
-                                    reason =  "",
-                                    modifier = Modifier.fillMaxWidth()
-                                )
-                                SubnettingInformation(
-                                    numberOfSubnetworks = ip.numberOfSubnets ?: 0,
-                                    numberOfHosts = ip.numberOfHosts,
-                                    range = (ip.firstUsableIP + ip.lastUsableIP),
-                                    networkIDs = listOf(ip.networkID),
-                                    broadcastIDs = listOf(ip.broadcastAddress),
-                                    modifier = Modifier.fillMaxWidth()
-                                )
-                            }
-                        }
-                    }
-                } else {
-                    // Mobile Layout (Column-based)
-                    Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
+                // Mobile Layout (Column-based)
+                LazyColumn(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(1) {
                         IPInformation(
                             ipAddress = ipAddress,
                             subnetMask = subnetMask,
@@ -177,7 +151,7 @@ fun IPCalculatorScreen(viewModel: IPViewModel, onExit: () -> Unit) {
                                 ipClass = ip.ipClass,
                                 addressType = ip.addressType,
                                 isGoodForHost = ip.isGoodForHost,
-                                reason =  "",
+                                reason = "",
                                 modifier = Modifier.fillMaxWidth()
                             )
 
@@ -199,41 +173,6 @@ fun IPCalculatorScreen(viewModel: IPViewModel, onExit: () -> Unit) {
                     style = MaterialTheme.typography.body1,
                     modifier = Modifier.padding(vertical = 32.dp)
                 )
-            }
-
-            // Buttons (Common for both layouts)
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                IPButton(
-                    text = "Calculate",
-                    modifier = Modifier.weight(1f).height(50.dp)
-                ) {
-                    try {
-                        viewModel.fetchIpInfo(ipAddress)
-                        errorMessage = null
-                    } catch (e: Exception) {
-                        errorMessage = e.message ?: "Invalid IP address or subnet mask"
-                    }
-                }
-
-                IPButton(
-                    text = "Save",
-                    modifier = Modifier.weight(1f).height(50.dp),
-                ) {
-                    ipInfo?.let { ipInfo ->
-                        saveIpInfoToCsv(listOf(ipInfo))
-                        showToast = true
-                    }
-                }
-
-                IPButton(
-                    text = "Close",
-                    modifier = Modifier.weight(1f).height(50.dp)
-                ) {
-                    onExit()
-                }
             }
         }
     }
