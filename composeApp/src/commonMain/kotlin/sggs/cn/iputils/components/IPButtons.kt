@@ -1,9 +1,10 @@
 package sggs.cn.iputils.components
 
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -18,13 +19,15 @@ fun IPButton(
     text:String,
     onClick: () -> Unit
 ) {
-    Button(modifier = modifier,
+    OutlinedButton(modifier = modifier,
         shape = RoundedCornerShape(10.dp),
-        colors = ButtonDefaults.buttonColors(
-            backgroundColor = Color.LightGray,
-            contentColor = Color.Black
+        colors = ButtonDefaults.outlinedButtonColors(
+            contentColor = Color.White,
+            backgroundColor = Color(0xFF333232)
+
         ),
-        onClick = { onClick() }) {
+        onClick = { onClick() },
+    ) {
         Text(text, fontFamily = FontFamily.SansSerif, textAlign = TextAlign.Center)
     }
 }

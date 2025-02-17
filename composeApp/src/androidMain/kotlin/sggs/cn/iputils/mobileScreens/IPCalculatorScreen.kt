@@ -24,7 +24,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import sggs.cn.iputils.components.BinaryInformation
 import sggs.cn.iputils.components.CustomToast
@@ -67,7 +69,8 @@ fun IPCalculatorScreen(viewModel: IPViewModel, onExit: () -> Unit) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = "IP Calculator") }
+                title = { Text(text = "IP Calculator", color = Color.White, fontFamily = FontFamily.SansSerif) },
+                backgroundColor = Color(0xFF333232)
             )
         },
         bottomBar = {
@@ -107,7 +110,7 @@ fun IPCalculatorScreen(viewModel: IPViewModel, onExit: () -> Unit) {
         }
     ) { padding ->
         Column(
-            modifier = Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp),
+            modifier = Modifier.fillMaxSize().padding(padding),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             if (ipInfo != null) {

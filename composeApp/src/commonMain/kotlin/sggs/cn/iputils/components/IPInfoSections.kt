@@ -1,6 +1,7 @@
 package sggs.cn.iputils.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,6 +23,7 @@ import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -65,7 +67,8 @@ fun IPInformation(
                 modifier = Modifier.weight(1f),
                 singleLine = true,
                 colors = TextFieldDefaults.outlinedTextFieldColors(
-                    backgroundColor = Color.White
+                    backgroundColor = Color.White,
+                    focusedBorderColor = Color.Black
                 ),
                 isError = isError,
                 placeholder = { Text("Enter IP Address") }
@@ -81,7 +84,7 @@ fun IPInformation(
         errorMessage?.let {
             Text(
                 text = it,
-                color = MaterialTheme.colors.error,
+                color = colors.error,
                 style = MaterialTheme.typography.caption,
                 textAlign = TextAlign.Left
             )
@@ -103,6 +106,8 @@ fun IPInformation(
                 singleLine = true,
                 colors = TextFieldDefaults.outlinedTextFieldColors(
                     backgroundColor = Color.White
+                    ,
+                    focusedBorderColor = Color.Black
                 )
             )
             Spacer(modifier = Modifier.width(8.dp))
@@ -129,6 +134,8 @@ fun IPInformation(
                 singleLine = true,
                 colors = TextFieldDefaults.outlinedTextFieldColors(
                     backgroundColor = Color.White
+                    ,
+                    focusedBorderColor = Color.Black
                 )
             )
             Spacer(modifier = Modifier.width(8.dp))
@@ -196,7 +203,8 @@ fun NetworkInformation(
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 colors = TextFieldDefaults.outlinedTextFieldColors(
-                    backgroundColor = Color.White
+                    backgroundColor = Color.White,
+                    focusedBorderColor = Color.Black
                 )
             )
         }
@@ -237,7 +245,8 @@ fun NetworkInformation(
                     modifier = Modifier.weight(1f),
                     singleLine = true,
                     colors = TextFieldDefaults.outlinedTextFieldColors(
-                        backgroundColor = Color.White
+                        backgroundColor = Color.White,
+                        focusedBorderColor = Color.Black
                     )
                 )
             }
@@ -278,7 +287,8 @@ fun BinaryInformation(
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 colors = TextFieldDefaults.outlinedTextFieldColors(
-                    backgroundColor = Color.White
+                    backgroundColor = Color.White,
+                    focusedBorderColor = Color.Black
                 )
             )
         }
@@ -298,7 +308,8 @@ fun BinaryInformation(
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 colors = TextFieldDefaults.outlinedTextFieldColors(
-                    backgroundColor = Color.White
+                    backgroundColor = Color.White,
+                    focusedBorderColor = Color.Black
                 )
             )
         }
@@ -318,7 +329,8 @@ fun BinaryInformation(
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 colors = TextFieldDefaults.outlinedTextFieldColors(
-                    backgroundColor = Color.White
+                    backgroundColor = Color.White,
+                    focusedBorderColor = Color.Black
                 )
             )
         }
@@ -359,7 +371,8 @@ fun SubnettingInformation(
                 modifier = Modifier.width(80.dp),
                 singleLine = true,
                 colors = TextFieldDefaults.outlinedTextFieldColors(
-                    backgroundColor = Color.White
+                    backgroundColor = Color.White,
+                    focusedBorderColor = Color.Black
                 )
             )
         }
@@ -379,7 +392,8 @@ fun SubnettingInformation(
                 modifier = Modifier.wrapContentWidth(),
                 singleLine = true,
                 colors = TextFieldDefaults.outlinedTextFieldColors(
-                    backgroundColor = Color.White
+                    backgroundColor = Color.White,
+                    focusedBorderColor = Color.Black
                 )
             )
         }
@@ -399,7 +413,8 @@ fun SubnettingInformation(
                 modifier = Modifier.width(80.dp),
                 singleLine = true,
                 colors = TextFieldDefaults.outlinedTextFieldColors(
-                    backgroundColor = Color.White
+                    backgroundColor = Color.White,
+                    focusedBorderColor = Color.Black
                 )
             )
         }
@@ -424,7 +439,8 @@ fun SubnettingInformation(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(120.dp)
-                .background(Color.LightGray, RoundedCornerShape(4.dp))
+                .background(Color.White, RoundedCornerShape(4.dp))
+                .border(2.dp, Color.Black)
                 .padding(4.dp)
         ) {
             Row {
