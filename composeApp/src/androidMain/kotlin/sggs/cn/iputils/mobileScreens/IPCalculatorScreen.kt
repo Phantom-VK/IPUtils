@@ -159,7 +159,7 @@ fun IPCalculatorScreen(viewModel: IPViewModel, onExit: () -> Unit) {
                             )
 
                             SubnettingInformation(
-                                numberOfSubnetworks = ip.numberOfSubnets ?: 0,
+                                numberOfSubnetworks = ip.numberOfSubnets,
                                 numberOfHosts = ip.numberOfHosts,
                                 range = "1",
                                 networkIDs = listOf(ip.networkID),
@@ -171,6 +171,7 @@ fun IPCalculatorScreen(viewModel: IPViewModel, onExit: () -> Unit) {
                 }
             } else {
                 // Show empty state or initial state
+
                 Text(
                     text = "Enter an IP address and click Calculate to begin",
                     style = MaterialTheme.typography.body1,
