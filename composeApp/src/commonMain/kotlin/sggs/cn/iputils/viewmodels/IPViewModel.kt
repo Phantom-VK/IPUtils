@@ -1,5 +1,6 @@
 package sggs.cn.iputils.viewmodels
 
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -24,11 +25,42 @@ class IPViewModel : ViewModel() {
         broadcastAddress = "",
         firstUsableIP = "",
         lastUsableIP = "",
-        binaryAddress = ""
+        binaryAddress = "",
+        longFormat = 0,
+        localHostNumber = 0,
+        networkPortion = "",
+        hostPortion = "",
+        isReserved = false
+
+
+
     )
 
     private val _ipInfo = MutableStateFlow<IPInfo?>(tempIPInfo)
     val ipInfo: StateFlow<IPInfo?> = _ipInfo.asStateFlow()
+
+    private val _dotIpAddress = mutableStateOf("")
+    val dotIpAddress: String get() = _dotIpAddress.value
+
+    private val _longIpAddress = mutableStateOf("")
+    val longIpAddress: String get() = _longIpAddress.value
+
+    private val _binaryDotIp = mutableStateOf("")
+    val binaryDotIp: String get() = _binaryDotIp.value
+
+    private val _binaryLongIp = mutableStateOf("")
+    val binaryLongIp: String get() = _binaryLongIp.value
+
+    private val _networkClass = mutableStateOf("")
+    val networkClass: String get() = _networkClass.value
+
+    private val _networkNumber = mutableStateOf("")
+    val networkNumber: String get() = _networkNumber.value
+
+    private val _localHostNumber = mutableStateOf("")
+    val localHostNumber: String get() = _localHostNumber.value
+
+    var currentScreen : String = "IP Calculator"
 
     fun fetchIpInfo(ip: String) {
 
@@ -40,9 +72,6 @@ class IPViewModel : ViewModel() {
         _ipInfo.value = tempIPInfo
 
     }
-
-
-
 
 
 }
